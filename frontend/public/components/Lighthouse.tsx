@@ -2,6 +2,8 @@
 
 // LighthouseReport.tsx
 import { useState, useEffect } from 'react';
+import RankPilot from './svg/RankPilot.svg';
+import { DotLottieReact } from '@lottiefiles/dotlottie-react';
 
 interface LighthouseData {
   reportJson: {
@@ -34,7 +36,7 @@ export default function LighthouseReport() {
   const runAudit = async () => {
     setLoading(true);
     setError(null);
-    
+
     try {
       const response = await fetch('http://localhost:3001/api/lighthouse', {
         method: 'POST',
@@ -61,10 +63,10 @@ export default function LighthouseReport() {
 
   const renderScore = (score: number | null) => {
     if (score === null) return <span className="score na">N/A</span>;
-    
+
     const percentage = Math.round((score || 0) * 100);
     const scoreClass = score >= 0.9 ? 'good' : score >= 0.5 ? 'average' : 'poor';
-    
+
     return (
       <span className={`score ${scoreClass}`}>
         {percentage}
@@ -75,7 +77,7 @@ export default function LighthouseReport() {
   const renderCategoryDetails = (categoryId: string) => {
     if (!data?.reportJson.categories[categoryId]) return null;
     const category = data.reportJson.categories[categoryId];
-    
+
     return (
       <div className="category-details">
         <h3>{category.title}</h3>
@@ -90,7 +92,7 @@ export default function LighthouseReport() {
   const renderAuditDetails = (auditId: string) => {
     if (!data?.reportJson.audits[auditId]) return null;
     const audit = data.reportJson.audits[auditId];
-    
+
     return (
       <div className="audit-details">
         <h4>{audit.title}</h4>
@@ -111,85 +113,95 @@ export default function LighthouseReport() {
 
   return (
     <div className="lighthouse-container">
-      <h1>Lighthouse Audit</h1>
-      
-      <div className="controls">
-        <input
-          type="text"
-          value={url}
-          onChange={(e) => setUrl(e.target.value)}
-          placeholder="Enter URL to audit"
-        />
-        <button onClick={runAudit} disabled={loading}>
-          {loading ? 'Running...' : 'Run Audit'}
-        </button>
-      </div>
-
-      {error && <div className="error">{error}</div>}
-
-      {data && (
-        <div className="report-container">
-          <div className="tabs">
-            <button
-              className={activeTab === 'summary' ? 'active' : ''}
-              onClick={() => setActiveTab('summary')}
-            >
-              Summary
-            </button>
-            <button
-              className={activeTab === 'audits' ? 'active' : ''}
-              onClick={() => setActiveTab('audits')}
-            >
-              Detailed Audits
-            </button>
-          </div>
-
-          {activeTab === 'summary' && (
-            <div className="summary-view">
-              <h2>Performance Summary</h2>
-              <div className="categories-grid">
-                {data.reportJson.categories && Object.entries(data.reportJson.categories).map(([id, category]) => (
-                  <div 
-                    key={id} 
-                    className={`category-card ${activeCategory === id ? 'active' : ''}`}
-                    onClick={() => setActiveCategory(id)}
-                  >
-                    <h3>{category.title}</h3>
-                    {renderScore(category.score)}
-                  </div>
-                ))}
-              </div>
-
-              {activeCategory && renderCategoryDetails(activeCategory)}
-            </div>
-          )}
-
-          {activeTab === 'audits' && (
-            <div className="audits-view">
-              <h2>Detailed Audits</h2>
-              <div className="audits-list">
-                {data.reportJson.audits && Object.entries(data.reportJson.audits).map(([id, audit]) => (
-                  <div key={id} className="audit-item">
-                    {renderAuditDetails(id)}
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {data.reportHtml && (
-            <details className="html-report">
-              <summary>View Full HTML Report</summary>
-              <iframe 
-                srcDoc={data.reportHtml}
-                title="Lighthouse HTML Report"
-                width="100%"
-                height="600px"
-              />
-            </details>
-          )}
+      {loading ? <DotLottieReact
+        src="https://lottie.host/db692c44-1bf1-49dc-bf24-765ad7164838/S7oJjhDRIy.lottie"
+        loop
+        autoplay
+      /> : <>
+        <nav className='flex justify-between w-dvw px-2'>
+          <RankPilot />
+        </nav>
+        <div className="controls pt-5">
+          <input
+            type="text"
+            value={url}
+            onChange={(e) => setUrl(e.target.value)}
+            placeholder="Enter URL to audit"
+            className='rounded-lg'
+          />
+          <button onClick={runAudit} disabled={loading}>
+            {loading ? 'Running...' : 'Run Audit'}
+          </button>
         </div>
-      )}
+
+        {error && <div className="error">{error}</div>}
+
+        {data && (
+          <div className="report-container">
+            <div className="tabs">
+              <button
+                className={activeTab === 'summary' ? 'active' : ''}
+                onClick={() => setActiveTab('summary')}
+              >
+                Summary
+              </button>
+              <button
+                className={activeTab === 'audits' ? 'active' : ''}
+                onClick={() => setActiveTab('audits')}
+              >
+                Detailed Audits
+              </button>
+            </div>
+
+            {activeTab === 'summary' && (
+              <div className="summary-view">
+                <h2 className='text-2xl pb-5'>Performance Summary</h2>
+                <div className="categories-grid">
+                  {data.reportJson.categories && Object.entries(data.reportJson.categories).map(([id, category]) => (
+                    <div
+                      key={id}
+                      className={`category-card ${activeCategory === id ? 'active' : ''} rounded-2xl transform hover:-translate-y-1.5`}
+                      onClick={() => setActiveCategory(id)}
+                    >
+                      <h3>{category.title}</h3>
+                      {renderScore(category.score)}
+                    </div>
+                  ))}
+                </div>
+
+                {activeCategory && renderCategoryDetails(activeCategory)}
+              </div>
+            )}
+
+            {activeTab === 'audits' && (
+              <div className="audits-view">
+                <h2 className='text-2xl pb-5'>Detailed Audits</h2>
+                <div className="audits-list">
+                  {data.reportJson.audits && Object.entries(data.reportJson.audits).map(([id, audit]) => (
+                    <div key={id} className="audit-item rounded-lg">
+                      {renderAuditDetails(id)}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {data.reportHtml && (
+              <details className="html-report">
+                <summary>View Full HTML Report</summary>
+                <iframe
+                  srcDoc={data.reportHtml}
+                  title="Lighthouse HTML Report"
+                  width="100%"
+                  height="600px"
+                />
+              </details>
+            )}
+          </div>
+        )}
+      </>}
+
+
 
       <style>{`
         .lighthouse-container {
@@ -209,20 +221,26 @@ export default function LighthouseReport() {
           flex: 1;
           padding: 8px;
           font-size: 16px;
+          border:1px solid #80ed99;
         }
         
         button {
           padding: 8px 16px;
-          background: #0078d4;
-          color: white;
+          background: #80ed99;
+          color: black;
           border: none;
           cursor: pointer;
+          border-radius : 10px;
+          transition:all ease 0.5s;
         }
         
         button:disabled {
           background: #ccc;
         }
-        
+        button:hover{
+        transform:translateY(-5px) scaleX(1.05);
+        transition:all ease 0.5s;
+        }
         .error {
           color: #d13438;
           padding: 10px;
@@ -233,20 +251,20 @@ export default function LighthouseReport() {
         .tabs {
           display: flex;
           margin-bottom: 20px;
-          border-bottom: 1px solid #ddd;
+          border-bottom: 1px solid #80ed99;
         }
         
         .tabs button {
           background: none;
-          color: #333;
+          color: #fff;
           border: none;
           border-bottom: 3px solid transparent;
           border-radius: 0;
         }
         
         .tabs button.active {
-          border-bottom-color: #0078d4;
-          color: #0078d4;
+          border-bottom-color: #80ed99;
+          color: #80ed99;
         }
         
         .categories-grid {
@@ -264,8 +282,8 @@ export default function LighthouseReport() {
         }
         
         .category-card:hover, .category-card.active {
-          border-color: #0078d4;
-          box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+          border-color: #80ed99;
+          box-shadow: 0 2px 50px #80ed99;
         }
         
         .category-card h3 {

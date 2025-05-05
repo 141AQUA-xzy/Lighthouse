@@ -1,7 +1,8 @@
-import express from 'express';
-import cors from 'cors';
-import * as chromeLauncher from 'chrome-launcher';
-import { createRequire } from 'node:module';
+import express from "express";
+import cors from "cors";
+import * as chromeLauncher from "chrome-launcher";
+import { createRequire } from "node:module";
+import { spawn } from "node:child_process";
 const require = createRequire(import.meta.url);
 
 const app = express();
@@ -10,67 +11,69 @@ const PORT = process.env.PORT || 3001;
 app.use(cors());
 app.use(express.json());
 
-app.post('/api/lighthouse', async (req, res) => {
+app.post("/api/lighthouse", async (req, res) => {
   let chrome;
   try {
     // Dynamic import of Lighthouse with error handling
-    const lighthouseModule = await import('lighthouse');
+    const lighthouseModule = await import("lighthouse");
     const { default: lighthouse } = lighthouseModule;
-    const { ReportGenerator } = await import('lighthouse/report/generator/report-generator.js');
+    const { ReportGenerator } = await import(
+      "lighthouse/report/generator/report-generator.js"
+    );
 
     const { url, options = {} } = req.body;
-    
+
     if (!url) {
-      return res.status(400).json({ error: 'URL is required' });
+      return res.status(400).json({ error: "URL is required" });
     }
 
     // Configuration that avoids the NO_LCP error
     const config = {
-      extends: 'lighthouse:default',
+      extends: "lighthouse:default",
       settings: {
-        skipAudits: ['largest-contentful-paint'],
-        throttlingMethod: 'devtools',
+        skipAudits: ["largest-contentful-paint"],
+        throttlingMethod: "devtools",
         throttling: {
           rttMs: 40,
           throughputKbps: 10 * 1024,
           cpuSlowdownMultiplier: 1,
           requestLatencyMs: 0,
           downloadThroughputKbps: 0,
-          uploadThroughputKbps: 0
-        }
-      }
+          uploadThroughputKbps: 0,
+        },
+      },
     };
 
-    chrome = await chromeLauncher.launch({ 
+    chrome = await chromeLauncher.launch({
       chromeFlags: [
-        '--headless',
-        '--no-sandbox',
-        '--disable-gpu',
-        '--disable-dev-shm-usage',
-        '--disable-setuid-sandbox'
-      ] 
+        "--headless",
+        "--no-sandbox",
+        "--disable-gpu",
+        "--disable-dev-shm-usage",
+        "--disable-setuid-sandbox",
+      ],
     });
-    
+
     // Workaround for performance mark error
     const runnerResult = await lighthouse(
       url,
       {
         port: chrome.port,
-        output: 'json',
+        output: "json",
         ...options,
         // Disable storage reset to prevent some timing issues
-        disableStorageReset: true
+        disableStorageReset: true,
       },
       config
     );
 
     if (!runnerResult) {
-      throw new Error('Lighthouse audit failed');
+      throw new Error("Lighthouse audit failed");
     }
 
     const reportJson = runnerResult.lhr;
-    const reportHtml = ReportGenerator.generateReport(runnerResult.lhr, 'html');
-    const reportCsv = ReportGenerator.generateReport(runnerResult.lhr, 'csv');
+    const reportHtml = ReportGenerator.generateReport(runnerResult.lhr, "html");
+    const reportCsv = ReportGenerator.generateReport(runnerResult.lhr, "csv");
 
     res.json({
       success: true,
@@ -79,22 +82,25 @@ app.post('/api/lighthouse', async (req, res) => {
         reportHtml,
         reportCsv,
         audits: runnerResult.lhr.audits,
-        categories: runnerResult.lhr.categories
-      }
+        categories: runnerResult.lhr.categories,
+      },
     });
   } catch (error) {
-    console.error('Full Lighthouse error:', error);
-    res.status(500).json({ 
-      success: false, 
+    console.error("Full Lighthouse error:", error);
+    res.status(500).json({
+      success: false,
       error: error.message,
       // Include more details in development
-      ...(process.env.NODE_ENV === 'development' && {
+      ...(process.env.NODE_ENV === "development" && {
         stack: error.stack,
-        errorType: error.constructor.name
-      })
+        errorType: error.constructor.name,
+      }),
     });
   } finally {
-    if (chrome) await chrome.kill().catch(e => console.error('Error killing chrome:', e));
+    if (chrome)
+      await chrome
+        .kill()
+        .catch((e) => console.error("Error killing chrome:", e));
   }
 });
 
