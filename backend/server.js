@@ -2,7 +2,7 @@ import express from "express";
 import cors from "cors";
 import * as chromeLauncher from "chrome-launcher";
 import { createRequire } from "node:module";
-import { spawn } from "node:child_process";
+import puppeteer from 'puppeteer';
 const require = createRequire(import.meta.url);
 
 const app = express();
