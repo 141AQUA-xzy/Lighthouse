@@ -38,7 +38,7 @@ export default function LighthouseReport() {
     setError(null);
 
     try {
-      const response = await fetch('http://localhost:3001/api/lighthouse', {
+      const response = await fetch('https://lighthouse-6vvx.onrender.com/api/lighthouse', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ url })
