@@ -5,8 +5,7 @@
   "main": "server.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node --no-warnings=ExperimentalWarning server.js",
-    "postinstall": "./chromium-install.sh"
+    "start": "node --no-warnings=ExperimentalWarning server.js"
   },
   "keywords": [],
   "author": "",
