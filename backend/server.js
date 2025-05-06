@@ -142,14 +142,15 @@ app.post("/api/lighthouse", async (req, res) => {
         throttlingMethod: "devtools"
       }
     };
-
-    const executablePath = await chrome.executablePath;
-    const isProduction = !!executablePath;
-
+    const isProduction = process.env.AWS_LAMBDA_FUNCTION_NAME || process.env.NODE_ENV === 'production';
+    const executablePath = isProduction
+      ? await chrome.executablePath
+      : undefined;
+    
     browser = await puppeteer.launch({
       args: chrome.args,
-      executablePath: isProduction ? executablePath : undefined,
-      headless: chrome.headless,
+      executablePath,
+      headless: isProduction ? chrome.headless : true,
       defaultViewport: { width: 1280, height: 800 }
     });
 
