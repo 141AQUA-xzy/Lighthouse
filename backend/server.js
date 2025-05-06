@@ -111,13 +111,11 @@
 //   console.log(`Server running on ${PORT}`);
 // });
 
-
 import chrome from 'chrome-aws-lambda';
-const { launch } = chrome; // Use default import for CommonJS
+import puppeteer from 'puppeteer-core'; // use puppeteer-core, not puppeteer
 import express from "express";
 import cors from "cors";
 import { createRequire } from "node:module";
-import puppeteer from 'puppeteer';
 const require = createRequire(import.meta.url);
 
 const app = express();
@@ -155,19 +153,22 @@ app.post("/api/lighthouse", async (req, res) => {
       },
     };
 
-    // Launch Chrome using chrome-aws-lambda
-    browser = await launch({
-      headless: true,
+    // ✅ Launch puppeteer with chrome-aws-lambda settings
+    browser = await puppeteer.launch({
       args: chrome.args,
-      executablePath: await chrome.executablePath,
+      executablePath: await chrome.executablePath || '/usr/bin/google-chrome',
+      headless: chrome.headless,
       defaultViewport: {
         width: 1280,
         height: 800,
       },
     });
 
+    const page = await browser.newPage();
+    const port = new URL(browser.wsEndpoint()).port;
+
     const runnerResult = await lighthouse(url, {
-      port: (await browser.wsEndpoint()).split(":")[1],
+      port,
       output: "json",
       ...options,
       disableStorageReset: true,
