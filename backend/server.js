@@ -147,7 +147,7 @@ app.post("/api/lighthouse", async (req, res) => {
     browser = await puppeteer.launch({
       args: chrome.args,
       executablePath,
-      headless: isProduction ? chrome.headless : true,
+      headless: chrome.headless,
       defaultViewport: { width: 1280, height: 800 }
     });
 
