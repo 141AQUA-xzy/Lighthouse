@@ -112,7 +112,8 @@
 // });
 
 
-import chrome from 'chrome-aws-lambda'; // Use default import for CommonJS
+import chrome from 'chrome-aws-lambda';
+const { launch } = chrome; // Use default import for CommonJS
 import express from "express";
 import cors from "cors";
 import { createRequire } from "node:module";
