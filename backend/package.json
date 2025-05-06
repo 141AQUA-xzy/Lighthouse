@@ -6,7 +6,7 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node --no-warnings=ExperimentalWarning server.js",
-    "build": "bash chromium-install.sh && npm install"
+    "postinstall": "./chromium-install.sh"
   },
   "keywords": [],
   "author": "",
