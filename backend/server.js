@@ -11,6 +11,8 @@ const PORT = process.env.PORT || 3001;
 app.use(cors());
 app.use(express.json());
 
+process.env.CHROME_PATH = process.env.CHROME_PATH || '/usr/bin/google-chrome-stable';
+
 app.post("/api/lighthouse", async (req, res) => {
   let chrome;
   try {
@@ -45,6 +47,7 @@ app.post("/api/lighthouse", async (req, res) => {
     };
 
     chrome = await chromeLauncher.launch({
+      chromePath: process.env.CHROME_PATH,
       chromeFlags: [
         "--headless",
         "--no-sandbox",
