@@ -111,13 +111,14 @@
 //   console.log(`Server running on ${PORT}`);
 // });
 
-import chrome from 'chrome-aws-lambda';
-import puppeteer from 'puppeteer-core'; // use puppeteer-core, not puppeteer
-import express from "express";
-import cors from "cors";
-import { createRequire } from "node:module";
-const require = createRequire(import.meta.url);
 
+import chrome from 'chrome-aws-lambda';
+import express from 'express';
+import cors from 'cors';
+import { createRequire } from 'node:module';
+import puppeteer from 'puppeteer-core';
+
+const require = createRequire(import.meta.url);
 const app = express();
 const PORT = process.env.PORT || 3001;
 
@@ -126,57 +127,40 @@ app.use(express.json());
 
 app.post("/api/lighthouse", async (req, res) => {
   let browser;
+
   try {
     const lighthouseModule = await import("lighthouse");
     const { default: lighthouse } = lighthouseModule;
     const { ReportGenerator } = await import("lighthouse/report/generator/report-generator.js");
 
     const { url, options = {} } = req.body;
-
-    if (!url) {
-      return res.status(400).json({ error: "URL is required" });
-    }
+    if (!url) return res.status(400).json({ error: "URL is required" });
 
     const config = {
       extends: "lighthouse:default",
       settings: {
-        skipAudits: ["largest-contentful-paint"],
-        throttlingMethod: "devtools",
-        throttling: {
-          rttMs: 40,
-          throughputKbps: 10 * 1024,
-          cpuSlowdownMultiplier: 1,
-          requestLatencyMs: 0,
-          downloadThroughputKbps: 0,
-          uploadThroughputKbps: 0,
-        },
-      },
+        throttlingMethod: "devtools"
+      }
     };
 
-    // ✅ Launch puppeteer with chrome-aws-lambda settings
+    const executablePath = await chrome.executablePath;
+    const isProduction = !!executablePath;
+
     browser = await puppeteer.launch({
       args: chrome.args,
-      executablePath: await chrome.executablePath || '/usr/bin/google-chrome',
+      executablePath: isProduction ? executablePath : undefined,
       headless: chrome.headless,
-      defaultViewport: {
-        width: 1280,
-        height: 800,
-      },
+      defaultViewport: { width: 1280, height: 800 }
     });
 
-    const page = await browser.newPage();
-    const port = new URL(browser.wsEndpoint()).port;
-
     const runnerResult = await lighthouse(url, {
-      port,
+      port: new URL(browser.wsEndpoint()).port,
       output: "json",
       ...options,
-      disableStorageReset: true,
+      disableStorageReset: true
     }, config);
 
-    if (!runnerResult) {
-      throw new Error("Lighthouse audit failed");
-    }
+    if (!runnerResult) throw new Error("Lighthouse audit failed");
 
     const reportJson = runnerResult.lhr;
     const reportHtml = ReportGenerator.generateReport(runnerResult.lhr, "html");
@@ -192,20 +176,15 @@ app.post("/api/lighthouse", async (req, res) => {
         categories: runnerResult.lhr.categories,
       },
     });
+
   } catch (error) {
     console.error("Full Lighthouse error:", error);
     res.status(500).json({
       success: false,
       error: error.message,
-      ...(process.env.NODE_ENV === "development" && {
-        stack: error.stack,
-        errorType: error.constructor.name,
-      }),
     });
   } finally {
-    if (browser) {
-      await browser.close().catch((e) => console.error("Error closing browser:", e));
-    }
+    if (browser) await browser.close().catch(console.error);
   }
 });
 
