@@ -112,8 +112,7 @@
 // });
 
 
-
-import { launch } from 'chrome-aws-lambda'; // use chrome-aws-lambda
+import chrome from 'chrome-aws-lambda'; // Use default import for CommonJS
 import express from "express";
 import cors from "cors";
 import { createRequire } from "node:module";
@@ -139,7 +138,6 @@ app.post("/api/lighthouse", async (req, res) => {
       return res.status(400).json({ error: "URL is required" });
     }
 
-    // Configuration that avoids the NO_LCP error
     const config = {
       extends: "lighthouse:default",
       settings: {
@@ -159,7 +157,7 @@ app.post("/api/lighthouse", async (req, res) => {
     // Launch Chrome using chrome-aws-lambda
     browser = await launch({
       headless: true,
-      args: chrome.ARGUMENTS,
+      args: chrome.args,
       executablePath: await chrome.executablePath,
       defaultViewport: {
         width: 1280,
@@ -167,7 +165,6 @@ app.post("/api/lighthouse", async (req, res) => {
       },
     });
 
-    // Workaround for performance mark error
     const runnerResult = await lighthouse(url, {
       port: (await browser.wsEndpoint()).split(":")[1],
       output: "json",
