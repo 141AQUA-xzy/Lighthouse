@@ -5,7 +5,8 @@
   "main": "server.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node --no-warnings=ExperimentalWarning server.js"
+    "start": "node --no-warnings=ExperimentalWarning server.js",
+    "build": "bash chromium-install.sh && npm install"
   },
   "keywords": [],
   "author": "",
@@ -15,11 +16,13 @@
     "@types/cors": "^2.8.17",
     "@types/express": "^5.0.1",
     "@types/node": "^22.15.3",
+    "chrome-aws-lambda": "^10.1.0",
     "chrome-launcher": "^1.1.2",
     "cors": "^2.8.5",
     "express": "^5.1.0",
     "lighthouse": "^12.6.0",
     "puppeteer": "^24.8.0",
+    "puppeteer-core": "^10.4.0",
     "ts-node": "^10.9.2",
     "typescript": "^5.8.3"
   }

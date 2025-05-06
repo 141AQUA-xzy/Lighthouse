@@ -111,13 +111,23 @@ export default function LighthouseReport() {
     );
   };
 
+ if (loading) {
+        return (
+          <div className="flex flex-col items-center justify-center h-screen">
+            <DotLottieReact
+              src="https://lottie.host/db692c44-1bf1-49dc-bf24-765ad7164838/S7oJjhDRIy.lottie"
+              loop
+              autoplay
+              style={{ width: '200px', height: '200px' }}
+            />
+            <p className="mt-4 text-lg">Running Lighthouse audit...</p>
+          </div>
+        );
+      }
+
   return (
     <div className="lighthouse-container">
-      {loading ? <DotLottieReact
-        src="https://lottie.host/db692c44-1bf1-49dc-bf24-765ad7164838/S7oJjhDRIy.lottie"
-        loop
-        autoplay
-      /> : <>
+   <>
         <nav className='flex justify-between w-dvw px-2'>
           <RankPilot />
         </nav>
@@ -199,8 +209,7 @@ export default function LighthouseReport() {
             )}
           </div>
         )}
-      </>}
-
+      </>
 
 
       <style>{`
@@ -210,20 +219,20 @@ export default function LighthouseReport() {
           margin: 0 auto;
           padding: 20px;
         }
-        
+
         .controls {
           display: flex;
           gap: 10px;
           margin: 20px 0;
         }
-        
+
         input {
           flex: 1;
           padding: 8px;
           font-size: 16px;
           border:1px solid #80ed99;
         }
-        
+
         button {
           padding: 8px 16px;
           background: #80ed99;
@@ -233,7 +242,7 @@ export default function LighthouseReport() {
           border-radius : 10px;
           transition:all ease 0.5s;
         }
-        
+
         button:disabled {
           background: #ccc;
         }
@@ -247,13 +256,13 @@ export default function LighthouseReport() {
           background: #fde7e9;
           margin: 10px 0;
         }
-        
+
         .tabs {
           display: flex;
           margin-bottom: 20px;
           border-bottom: 1px solid #80ed99;
         }
-        
+
         .tabs button {
           background: none;
           color: #fff;
@@ -261,84 +270,84 @@ export default function LighthouseReport() {
           border-bottom: 3px solid transparent;
           border-radius: 0;
         }
-        
+
         .tabs button.active {
           border-bottom-color: #80ed99;
           color: #80ed99;
         }
-        
+
         .categories-grid {
           display: grid;
           grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
           gap: 15px;
           margin-bottom: 20px;
         }
-        
+
         .category-card {
           border: 1px solid #ddd;
           padding: 15px;
           cursor: pointer;
           transition: all 0.2s;
         }
-        
+
         .category-card:hover, .category-card.active {
           border-color: #80ed99;
           box-shadow: 0 2px 50px #80ed99;
         }
-        
+
         .category-card h3 {
           margin-top: 0;
         }
-        
+
         .score {
           display: inline-block;
           padding: 2px 8px;
           border-radius: 4px;
           font-weight: bold;
         }
-        
+
         .score.good {
           background: #d4edda;
           color: #155724;
         }
-        
+
         .score.average {
           background: #fff3cd;
           color: #856404;
         }
-        
+
         .score.poor {
           background: #f8d7da;
           color: #721c24;
         }
-        
+
         .score.na {
           background: #e2e3e5;
           color: #383d41;
         }
-        
+
         .audit-item {
           margin-bottom: 20px;
           padding: 15px;
           border: 1px solid #eee;
         }
-        
+
         .audit-meta {
           display: flex;
           gap: 15px;
           margin: 10px 0;
         }
-        
+
         details pre {
           background: #f5f5f5;
           padding: 10px;
           overflow-x: auto;
         }
-        
+
         .html-report {
           margin-top: 30px;
         }
-        
+
         .html-report iframe {
           border: 1px solid #ddd;
         }
